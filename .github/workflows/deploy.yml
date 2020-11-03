@@ -25,9 +25,8 @@ jobs:
 
       - name: Deploy
         run: |
-          if [[ ! -e "$HOME/.ssh" ]]; then
-            mkdir -p "$HOME/.ssh" && mkdir 700 "$HOME/.ssh" ;
-          fi
+          mkdir -p "$HOME/.ssh" || true ;
+          mkdir 700 "$HOME/.ssh" || true;
           echo "${{ secrets.DEPLOY_SSH_KEY_FOR_PROXY_SHKITS_COM }}" > $HOME/.ssh/id_ed25519_deploy_proxy_document ;
           chmod 600 $HOME/.ssh/id_ed25519_deploy_proxy_document ;
           cd docs/.vuepress/ && mv dist proxy-doc;
