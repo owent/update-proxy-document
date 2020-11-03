@@ -25,12 +25,12 @@ jobs:
 
       - name: Deploy
         run: |
-          if [[ ! -e ~/.ssh ]]; then
-            mkdir -p ~/.ssh && mkdir 700 ~/.ssh ;
+          if [[ ! -e "$HOME/.ssh" ]]; then
+            mkdir -p "$HOME/.ssh" && mkdir 700 "$HOME/.ssh" ;
           fi
-          echo "${{ secrets.DEPLOY_SSH_KEY_FOR_PROXY_SHKITS_COM }}" > ~/.ssh/id_ed25519_deploy_proxy_document ;
-          chmod 600 ~/.ssh/id_ed25519_deploy_proxy_document ;
+          echo "${{ secrets.DEPLOY_SSH_KEY_FOR_PROXY_SHKITS_COM }}" > $HOME/.ssh/id_ed25519_deploy_proxy_document ;
+          chmod 600 $HOME/.ssh/id_ed25519_deploy_proxy_document ;
           cd docs/.vuepress/ && mv dist proxy-doc;
           tar -Jcvf proxy-doc.tar.xz proxy-doc;
-          scp -P 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i ~/.ssh/id_ed25519_deploy_proxy_document proxy-doc.tar.xz tools@proxy-doc.shkits.com:/home/website/ ;
-          ssh -p 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i ~/.ssh/id_ed25519_deploy_proxy_document tools@proxy-doc.shkits.com "cd /home/website/; if [[ -e proxy-doc.bak ]]; then rm -rf proxy-doc.bak ; fi; if [[ -e proxy-doc ]]; then mv proxy-doc proxy-doc.bak ; fi; tar -axvf proxy-doc.tar.xz && ./restart-nginx-pod.sh" ;
+          scp -P 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document proxy-doc.tar.xz tools@proxy-doc.shkits.com:/home/website/ ;
+          ssh -p 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document tools@proxy-doc.shkits.com "cd /home/website/; if [[ -e proxy-doc.bak ]]; then rm -rf proxy-doc.bak ; fi; if [[ -e proxy-doc ]]; then mv proxy-doc proxy-doc.bak ; fi; tar -axvf proxy-doc.tar.xz && ./restart-nginx-pod.sh" ;
