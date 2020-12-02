@@ -38,10 +38,10 @@ jobs:
       - name: Install and Build proxy-guide
         run: |
           cd "$GITHUB_WORKSPACE/proxy-guide"
-          yarn global add gitbook-cli ;
-          yarn exec gitbook init ;
-          yarn exec gitbook install ;
-          yarn exec gitbook build ;
+          yarn global add gitbook-cli || true; # gitbook开源版本似乎不维护了，失败就跳过吧
+          yarn exec gitbook init || true; # gitbook开源版本似乎不维护了，失败就跳过吧
+          yarn exec gitbook install || true; # gitbook开源版本似乎不维护了，失败就跳过吧
+          yarn exec gitbook build || true; # gitbook开源版本似乎不维护了，失败就跳过吧
           if [[ -e _book ]]; then
             mv _book "$GITHUB_WORKSPACE/doc-dist/proxy-guide" ;
           fi
