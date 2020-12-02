@@ -34,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          repository: 'ToutyRater/v2ray-guide'
+          repository: 'v2fly/v2ray-step-by-step'
           fetch-depth: 1
           lfs: true 
           path: proxy-guide 
