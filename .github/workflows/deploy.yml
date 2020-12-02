@@ -23,9 +23,12 @@ jobs:
         run: |
           if [[ -e "$GITHUB_WORKSPACE/doc-dist" ]]; then rm -rf "$GITHUB_WORKSPACE/doc-dist"; fi
           mkdir -p "$GITHUB_WORKSPACE/doc-dist";
-          cd "$GITHUB_WORKSPACE/proxy-doc"
-          yarn install
-          yarn build
+          cd "$GITHUB_WORKSPACE/proxy-doc" ;
+          for REPLACE_FILE in $(grep -R -F "guide.v2fly.org" * | awk 'BEGIN{FS=":"}{print $1;}'); do
+            sed -i -s 's/guide\.v2fly\.org/proxy-guide.shkits.com/g' "$REPLACE_FILE" ;
+          done
+          yarn install ;
+          yarn build ;
           mv docs/.vuepress/dist "$GITHUB_WORKSPACE/doc-dist/proxy-doc";
           
       - name: Checkout
@@ -33,18 +36,18 @@ jobs:
         with:
           repository: 'ToutyRater/v2ray-guide'
           fetch-depth: 1
+          lfs: true 
           path: proxy-guide 
+          ref: gh-pages 
 
       - name: Install and Build proxy-guide
         run: |
           cd "$GITHUB_WORKSPACE/proxy-guide"
-          yarn global add gitbook-cli || true; # gitbook开源版本似乎不维护了，失败就跳过吧
-          yarn exec gitbook init || true; # gitbook开源版本似乎不维护了，失败就跳过吧
-          yarn exec gitbook install || true; # gitbook开源版本似乎不维护了，失败就跳过吧
-          yarn exec gitbook build || true; # gitbook开源版本似乎不维护了，失败就跳过吧
-          if [[ -e _book ]]; then
-            mv _book "$GITHUB_WORKSPACE/doc-dist/proxy-guide" ;
-          fi
+          mkdir -p "$GITHUB_WORKSPACE/doc-dist/proxy-guide" ;
+          for REPLACE_FILE in $(grep -R -F "guide.v2fly.org" * | awk 'BEGIN{FS=":"}{print $1;}'); do
+            sed -i -s 's/guide\.v2fly\.org/proxy-guide.shkits.com/g' "$REPLACE_FILE" ;
+          done
+          cp -rf * "$GITHUB_WORKSPACE/doc-dist/proxy-guide/" ;
 
       - name: Deploy
         run: |
