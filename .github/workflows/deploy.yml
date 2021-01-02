@@ -17,11 +17,37 @@ jobs:
         with:
           repository: 'v2fly/v2fly-github-io'
           fetch-depth: 1
+          path: proxy-doc 
 
-      - name: Install and Build
+      - name: Install and Build proxy-doc
         run: |
-          yarn install
-          yarn build
+          if [[ -e "$GITHUB_WORKSPACE/doc-dist" ]]; then rm -rf "$GITHUB_WORKSPACE/doc-dist"; fi
+          mkdir -p "$GITHUB_WORKSPACE/doc-dist";
+          cd "$GITHUB_WORKSPACE/proxy-doc" ;
+          for REPLACE_FILE in $(grep -R -F "guide.v2fly.org" * | awk 'BEGIN{FS=":"}{print $1;}'); do
+            sed -i -s 's/guide\.v2fly\.org/proxy-guide.shkits.com/g' "$REPLACE_FILE" ;
+          done
+          yarn install ;
+          yarn build ;
+          mv docs/.vuepress/dist "$GITHUB_WORKSPACE/doc-dist/proxy-doc";
+          
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          repository: 'v2fly/v2ray-step-by-step'
+          fetch-depth: 1
+          lfs: true 
+          path: proxy-guide 
+          ref: gh-pages 
+
+      - name: Install and Build proxy-guide
+        run: |
+          cd "$GITHUB_WORKSPACE/proxy-guide"
+          mkdir -p "$GITHUB_WORKSPACE/doc-dist/proxy-guide" ;
+          for REPLACE_FILE in $(grep -R -F "guide.v2fly.org" * | awk 'BEGIN{FS=":"}{print $1;}'); do
+            sed -i -s 's/guide\.v2fly\.org/proxy-guide.shkits.com/g' "$REPLACE_FILE" ;
+          done
+          cp -rf * "$GITHUB_WORKSPACE/doc-dist/proxy-guide/" ;
 
       - name: Deploy
         run: |
@@ -29,7 +55,7 @@ jobs:
           mkdir 700 "$HOME/.ssh" || true;
           echo "${{ secrets.DEPLOY_SSH_KEY_FOR_PROXY_SHKITS_COM }}" > $HOME/.ssh/id_ed25519_deploy_proxy_document ;
           chmod 600 $HOME/.ssh/id_ed25519_deploy_proxy_document ;
-          cd docs/.vuepress/ && mv dist proxy-doc;
-          tar -Jcvf proxy-doc.tar.xz proxy-doc;
-          scp -P 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document proxy-doc.tar.xz tools@vr-l.shkits.com:/home/website/ ;
-          ssh -p 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document tools@vr-l.shkits.com "cd /home/website/; if [[ -e proxy-doc.bak ]]; then rm -rf proxy-doc.bak ; fi; if [[ -e proxy-doc ]]; then mv proxy-doc proxy-doc.bak ; fi; tar -axvf proxy-doc.tar.xz && ./restart-nginx-pod.sh" ;
+          cd "$GITHUB_WORKSPACE/doc-dist";
+          tar -Jcvf doc-dist.tar.xz *;
+          scp -P 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document doc-dist.tar.xz tools@vr-l.shkits.com:/home/website/ ;
+          ssh -p 36000 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o User=tools -i $HOME/.ssh/id_ed25519_deploy_proxy_document tools@vr-l.shkits.com "cd /home/website/; if [[ -e proxy-doc.bak ]]; then rm -rf proxy-doc.bak ; fi; if [[ -e proxy-doc ]]; then mv proxy-doc proxy-doc.bak ; fi; if [[ -e proxy-guide.bak ]]; then rm -rf proxy-guide.bak ; fi; if [[ -e proxy-guide ]]; then mv proxy-guide proxy-guide.bak ; fi; tar -axvf doc-dist.tar.xz && ./restart-nginx-pod.sh" ;
