@@ -1,3 +1,3 @@
-# update-proxy-document
+# Update Proxy Document
 
 Auto update proxy documents
